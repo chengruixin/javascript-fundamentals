@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        class P {
+    foo() { console.log( "P.foo" ); }
+    }
+    class C extends P {
+    foo() {
+    super();
+    }
+    }
+    var c1 = new C();
+    c1.foo(); // "P.foo"
+    var D = {
+    foo: function() { console.log( "D.foo" ); }
+    };
+    var E = {
+    foo: C.prototype.foo
+    };
+    // 把 E 委托到 D
+    Object.setPrototypeOf( E, D );
+    E.foo(); // "P.foo"
+    </script>
+</body>
+</html>
+
+// const Foo = {
+//     render : function(){
+//         console.log("fd");
+//     }
+// }
+
+// const Bar = Object.create(Foo);
+
+// Bar.speicalRender = function(){
+//     this.render();
+//     console.log("cin");
+
+//     const h = ()=>{
+//         console.log(this);
+//     }
+
+//     h();
+// }
+
+// const b = Object.create(Bar);
+// b.h = "fd";
+// b.speicalRender();
+
