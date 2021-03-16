@@ -219,9 +219,6 @@ function promiseResolveProcedure(promise2, x, resolve, reject){
     }).catch().catch( data => {
         console.log("got data 1" , data);
     })
-
-    
-
 })();
 
 // Test();

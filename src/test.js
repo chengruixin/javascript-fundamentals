@@ -1,7 +1,5 @@
-function foo(){
-    console.log(a);
-
-}
-
-foo();
-// console.log(a);
+try {
+    Promise.resolve().then(() => {throw new Error('Whoops.')})
+    } catch (e) {
+    console.log('sdfasdf');
+    }
