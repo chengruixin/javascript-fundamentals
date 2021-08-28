@@ -1,4 +1,5 @@
 const createHeap = (isMinHeap, initialArray) => {
+    
     // console.log(Object.prototype.toString.call(initialArray))
     const heap =
         Object.prototype.toString.call(initialArray) === "[object Array]"
