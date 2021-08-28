@@ -2,18 +2,18 @@ const PENDING = "pending";
 const FULFILLED = "fulfilled";
 const REJECTED = "rejected";
 
-function XPromise(callbackFn){
+function XPromise(callbackFn) {
     this.status = PENDING;
     this.value = undefined;
     this.reason = undefined;
     this.onFulfilledCallbacks = [];
     this.onRejectedCallbacks = [];
-   
+
     callbackFn(this.resolve.bind(this), this.reject.bind(this));
 }
 
-XPromise.prototype.resolve = function(value){
-    if(this.status !== PENDING || this.status === REJECTED){
+XPromise.prototype.resolve = function (value) {
+    if (this.status !== PENDING || this.status === REJECTED) {
         return;
     }
 
@@ -21,14 +21,13 @@ XPromise.prototype.resolve = function(value){
     this.value = value;
 
     //Make all callbacks in array to be called with value passed in.
-    for(let i = 0; i < this.onFulfilledCallbacks.length; i++){
-        queueMicrotask( this.onFulfilledCallbacks[i]);
+    for (let i = 0; i < this.onFulfilledCallbacks.length; i++) {
+        queueMicrotask(this.onFulfilledCallbacks[i]);
     }
+};
 
-}
-
-XPromise.prototype.reject = function(reason) {
-    if(this.status !== PENDING || this.status === FULFILLED) {
+XPromise.prototype.reject = function (reason) {
+    if (this.status !== PENDING || this.status === FULFILLED) {
         return;
     }
 
@@ -36,105 +35,105 @@ XPromise.prototype.reject = function(reason) {
     this.reason = reason;
 
     //Make all callbacks in array to be called with value passed in.
-    for(let i = 0; i < this.onRejectedCallbacks.length; i++){
-        queueMicrotask( this.onRejectedCallbacks[i]);
+    for (let i = 0; i < this.onRejectedCallbacks.length; i++) {
+        queueMicrotask(this.onRejectedCallbacks[i]);
     }
-}
+};
 
 XPromise.prototype.then = function (onFulfilled, onRejected) {
-    
-    if(typeof onFulfilled !== 'function') {
-        onFulfilled = v => v;
+    if (typeof onFulfilled !== "function") {
+        onFulfilled = (v) => v;
     }
 
-    if(typeof onRejected !== 'function') {
-        onRejected = e => { throw e };
+    if (typeof onRejected !== "function") {
+        onRejected = (e) => {
+            throw e;
+        };
     }
-    let promise2 = new XPromise((resolve, reject)=> {
+    let promise2 = new XPromise((resolve, reject) => {
         try {
             let x;
 
             const successCallback = () => {
-                try{
-                    if(x) return; // if it is already being set
+                try {
+                    if (x) return; // if it is already being set
 
                     x = onFulfilled(this.value);
 
                     promiseResolveProcedure(promise2, x, resolve, reject);
-
                 } catch (e) {
                     reject(e);
                 }
-
-            }
+            };
 
             const failureCallback = () => {
                 try {
-                    if(x) return; // if it is already being set
-
+                    
+                    if (x) return; // if it is already being set
+                    
                     x = onRejected(this.reason);
-    
+                    console.log(1);
                     promiseResolveProcedure(promise2, x, resolve, reject);
-
                 } catch (e) {
+                   
                     reject(e);
                 }
-               
-            }
+            };
 
-            if(this.status === PENDING){
+            if (this.status === PENDING) {
                 this.onFulfilledCallbacks.push(successCallback);
                 this.onRejectedCallbacks.push(failureCallback);
-            }
-        
-            else if(this.status === FULFILLED){
-                queueMicrotask(successCallback)
-            }
-        
-            else if(this.status === REJECTED) {
+            } else if (this.status === FULFILLED) {
+                queueMicrotask(successCallback);
+            } else if (this.status === REJECTED) {
+               
                 queueMicrotask(failureCallback);
             }
-        } catch (e) { // 2.2.7.2
+        } catch (e) {
+            // 2.2.7.2
             reject(e);
         }
-    })
-    
-    return promise2;
+    });
 
-}
+    return promise2;
+};
 
 XPromise.prototype.catch = function (onRejected) {
-    if(typeof onRejected !== 'function') {
-        onRejected = e => { throw e };
+    if (typeof onRejected !== "function") {
+        onRejected = (e) => {
+            throw e;
+        };
     }
 
-    let promise2 = new XPromise((resolve,reject)=>{
+    let promise2 = new XPromise((resolve, reject) => {
         try {
             let x;
             const failureCallback = () => {
                 try {
-                    if(x) return; // if it is already being set
+                    if (x) return; // if it is already being set
 
                     x = onRejected(this.reason);
-    
+
                     promiseResolveProcedure(promise2, x, resolve, reject);
-
                 } catch (e) {
                     reject(e);
                 }
-               
-            }
+            };
             const successCallback = () => {
-                try{
-                    if(x) return;
+                try {
+                    if (x) return;
 
-                    promiseResolveProcedure(promise2, this.value, resolve, reject);
-
+                    promiseResolveProcedure(
+                        promise2,
+                        this.value,
+                        resolve,
+                        reject
+                    );
                 } catch (e) {
                     reject(e);
                 }
-            }
-            if(this.status === PENDING){
+            };
+            if (this.status === PENDING) {
                 this.onFulfilledCallbacks.push(successCallback);
                 this.onRejectedCallbacks.push(failureCallback);
             } else if (this.status === REJECTED) {
@@ -145,80 +144,83 @@ XPromise.prototype.catch = function (onRejected) {
         } catch (e) {
             reject(e);
         }
-    })
+    });
 
     return promise2;
-}
-function promiseResolveProcedure(promise2, x, resolve, reject){
-    if(promise2 === x) {
+};
+function promiseResolveProcedure(promise2, x, resolve, reject) {
+    if (promise2 === x) {
         reject(new TypeError("promise2 is equal to x"));
         return;
     }
 
-    if(x instanceof XPromise) {
+    if (x instanceof XPromise) {
         if (x.status === PENDING) {
-            x.then( data => {
+            x.then((data) => {
                 promiseResolveProcedure(promise2, data, resolve, reject);
             });
         } else if (x.status === FULFILLED) {
-            x.then( data => {
+            x.then((data) => {
                 resolve(data);
             });
         } else if (x.status === REJECTED) {
-            x.then( data => {
+            x.then((data) => {
                 reject(data);
-            })
+            });
         }
 
         return;
     }
 
-    if(typeof x === 'object' || typeof x === 'function'){
+    if (typeof x === "object" || typeof x === "function") {
         try {
             let then = x.then;
             let called = false;
-            if(typeof then === 'function') {
-
+            if (typeof then === "function") {
                 try {
                     then.call(x, resolvePromise, rejectPromise);
                     const resolvePromise = (y) => {
-                        if(called) return;
+                        if (called) return;
                         called = true;
                         promiseResolveProcedure(promise2, y, resolve, reject);
-                    }
+                    };
 
                     const rejectPromise = (r) => {
-                        if(called) return;
+                        if (called) return;
                         called = true;
                         reject(r);
-                    }
+                    };
                 } catch (e) {
-                    if(called) return;
+                    if (called) return;
                     reject(e);
                 }
-                
             } else {
                 resolve(x);
             }
-
-        } catch(e) {
+        } catch (e) {
             reject(e);
         }
-        
     } else {
         resolve(x);
     }
-
 }
 /** Test */
-(function Test(){
-    const p = new XPromise((resolve,reject)=> {
-        setTimeout(()=>{
-            reject(1);
-        }, 500)
-    }).catch().catch( data => {
-        console.log("got data 1" , data);
+(function Test() {
+    let p = new XPromise((resolve, reject) => {
+        reject(1);
     })
+        .then(null, null)
+        .catch((err) => {
+            console.log(err, "dfd");
+        });
+
+    let p1 = new Promise((resolve, reject) => {
+        reject(1);
+    })
+        .then(null, null)
+        .catch((err) => {
+            console.log(err, "dfd");
+        });
 })();
 
 // Test();
