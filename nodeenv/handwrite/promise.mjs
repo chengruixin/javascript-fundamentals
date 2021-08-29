@@ -2,7 +2,7 @@ const PENDING = Symbol("PENGINDG");
 const FULFILLED = Symbol("FULLFILLED");
 const REJECTED = Symbol("REJECTED");
 
-export default function MyPromise(executor) {
+export default function Promise(executor) {
     this.status = PENDING;
     this.value = null;
     this.reason = null;
@@ -13,7 +13,7 @@ export default function MyPromise(executor) {
     executor(this.resolve.bind(this), this.reject.bind(this));
 }
 
-MyPromise.prototype.resolve = function (value) {
+Promise.prototype.resolve = function (value) {
     if (this.status === REJECTED || this.status === FULFILLED) {
         console.log("status change error", this.value);
         return;
@@ -27,7 +27,7 @@ MyPromise.prototype.resolve = function (value) {
     }
 };
 
-MyPromise.prototype.reject = function (reason) {
+Promise.prototype.reject = function (reason) {
     if (this.status === FULFILLED || this.status === REJECTED) {
         console.log("status change error", this.reason);
         return;
@@ -41,7 +41,7 @@ MyPromise.prototype.reject = function (reason) {
     }
 };
 
-MyPromise.prototype.then = function (resolveCallback, rejectCallback) {
+Promise.prototype.then = function (resolveCallback, rejectCallback) {
     if (typeof resolveCallback !== "function") {
         resolveCallback = (v) => v;
     }
@@ -52,7 +52,7 @@ MyPromise.prototype.then = function (resolveCallback, rejectCallback) {
         };
     }
 
-    const p2 = new MyPromise((resolve, reject) => {
+    const p2 = new Promise((resolve, reject) => {
         if (this.status === FULFILLED) {
             queueMicrotask(() => {
                 try {
@@ -101,13 +101,13 @@ MyPromise.prototype.then = function (resolveCallback, rejectCallback) {
     return p2;
 };
 
-MyPromise.prototype.catch = function (rejectCallback) {
+Promise.prototype.catch = function (rejectCallback) {
     if (typeof rejectCallback !== "function") {
         rejectCallback = (e) => {
             throw e;
         };
     }
-    const p2 = new MyPromise((resolve, reject) => {
+    const p2 = new Promise((resolve, reject) => {
         if (this.status === FULFILLED) {
             queueMicrotask(() => {
                 resolvePromiseProcedure(p2, this.value, resolve, reject);
@@ -155,10 +155,9 @@ function resolvePromiseProcedure(p2, result, resolve, reject) {
         throw new ReferenceError("having two promises the same");
     }
 
-    if (result instanceof MyPromise) {
+    if (result instanceof Promise) {
         result
             .then((v) => {
-                console.log(v);
                 resolvePromiseProcedure(p2, v, resolve, reject);
             })
             .catch((err) => {
@@ -170,3 +169,57 @@ function resolvePromiseProcedure(p2, result, resolve, reject) {
     // Do not consider .then for the time being
     resolve(result);
 }
+
+Promise.all = function (arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input should be an array");
+    }
+    const n = arr.length;
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        const results = new Array(n);
+
+        for (let i = 0; i < n; i++) {
+            Promise.resolve(arr[i])
+                .then((v) => {
+                    results[i] = v;
+                    count++;
+
+                    if (count >= n) {
+                        resolve(results);
+                    }
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        }
+    });
+};
+
+Promise.race = function (arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input should be an array");
+    }
+    return new Promise((resolve, reject) => {
+        for(let p of arr) {
+            // Promise.resolve(p).then( v => {
+            //     resolve(v);
+            // }).catch( e => {
+            //     reject(e);
+            // })
+            Promise.resolve(p).then(resolve, reject);
+        }
+    });
+};
+
+Promise.resolve = function (toBeResolved) {
+    return new Promise((resolve, reject) => {
+        resolvePromiseProcedure(null, toBeResolved, resolve, reject);
+    });
+};
+
+Promise.reject = function (toBeRejected) {
+    return new Promise((resolve, reject) => {
+        reject(toBeRejected)
+    })
+};
