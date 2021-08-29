@@ -1,4 +1,9 @@
-import Promise from "./promise.mjs";
+import Promise from "./promise.practice.mjs";
+
+
+// pending -> fulfilled this.value = "success" fulfilled
+// pending -> rejected this.reason = "error" rejected
+
 
 // Test: reject
 // Promise.reject(new Promise((resolve) => {
