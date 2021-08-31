@@ -201,7 +201,7 @@ Promise.race = function (arr) {
         throw new TypeError("Input should be an array");
     }
     return new Promise((resolve, reject) => {
-        for(let p of arr) {
+        for (let p of arr) {
             // Promise.resolve(p).then( v => {
             //     resolve(v);
             // }).catch( e => {
@@ -220,6 +220,6 @@ Promise.resolve = function (toBeResolved) {
 
 Promise.reject = function (toBeRejected) {
     return new Promise((resolve, reject) => {
-        reject(toBeRejected)
-    })
+        reject(toBeRejected);
+    });
 };
