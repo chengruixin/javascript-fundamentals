@@ -15,6 +15,7 @@ function ChildClass(name, age, position){
 }
 
 ChildClass.prototype = new ParentClass();
-
-const child = new ChildClass("ruixin", 3, "dfd");
-child.printInfo();
+ChildClass.prototype.constructor = ChildClass;
+console.log(ChildClass.prototype.constructor);
+// const child = new ChildClass("ruixin", 3, "dfd");
+// child.printInfo();

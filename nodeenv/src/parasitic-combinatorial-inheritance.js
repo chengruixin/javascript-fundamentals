@@ -30,3 +30,16 @@ inheritProperty(ChildClass, ParentClass);
 
 const child = new ChildClass("ruixin",26, "leader");
 child.printInfo();
+
+
+// function inherit(childClass, parentClass) {
+//     const temp = Object.create(parentClass.prototype);
+//     temp.constructor = childClass;
+//     childClass.prototype = temp;
+// }
+
+// function createO(obj) {
+//     function fn(){}
+//     fn.prototype = obj;
+//     return new fn()
+// }
